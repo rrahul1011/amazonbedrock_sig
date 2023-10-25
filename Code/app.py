@@ -24,10 +24,10 @@ from function import visualize_timeseries ,yoy_growth,calculate_trend_slope_data
 st.set_option('deprecation.showPyplotGlobalUse', False)
 st.set_page_config(
             page_title="Sigmoid GenAI",
-            page_icon="/Users/rahulkushwaha/Desktop/SigmoidGenai/Amazon Bedrock/StreamlitApp/Code/cropped-Sigmoid_logo_3x.png"  
+            page_icon="Code/cropped-Sigmoid_logo_3x.png"  
         )
 st.sidebar.markdown("<hr style='border: 2px solid red; width: 100%;'>", unsafe_allow_html=True)
-st.sidebar.image("/Users/rahulkushwaha/Desktop/SigmoidGenai/Amazon Bedrock/StreamlitApp/Code/cropped-Sigmoid_logo_3x.png", use_column_width=True)
+st.sidebar.image("Code/cropped-Sigmoid_logo_3x.png", use_column_width=True)
 st.sidebar.markdown("<hr style='border: 2px solid red; width: 100%;'>", unsafe_allow_html=True)
 st.markdown('<style>div.row-widget.stButton > button:first-child {background-color: blue; color: white;}</style>', unsafe_allow_html=True)
 
@@ -60,7 +60,7 @@ def select_level(d):
 
         return selected_levels, selected_category, selected_brand, selected_SKU
 
-df_dash = pd.read_csv("/Users/rahulkushwaha/Desktop/SigmoidGenai/Amazon Bedrock/StreamlitApp/Data/retail3.csv")
+df_dash = pd.read_csv("Data/retail3.csv")
 tab1, tab2 ,tab3,tab4,tab5,tab6= st.tabs(["About the App", "Demand forecasting interpreater","CodeAI","Personlized Message","Image Gen","Q&A"])
 with tab1:
         st.markdown('<p style="color:red; font-size:30px; font-weight:bold;">About The App:</p>', unsafe_allow_html=True)
@@ -290,7 +290,7 @@ with tab3:
         if __name__ == "__main__":
             main()
 with tab4:
-    df_final = pd.read_csv("/Users/rahulkushwaha/Desktop/SigmoidGenai/Amazon Bedrock/StreamlitApp/Data/df_final_with_name.csv")
+    df_final = pd.read_csv("Data/df_final_with_name.csv")
     existing_user = df_final["user_id"].unique()
     customer_style = """British English \
             thrilled and delighted
