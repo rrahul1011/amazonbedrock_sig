@@ -290,7 +290,7 @@ with tab3:
         if __name__ == "__main__":
             main()
 with tab4:
-    df_final = pd.read_csv("Data/df_final_with_name.csv")
+    df_final = pd.read_csv("Data/df_final_with_name2.csv")
     existing_user = df_final["user_id"].unique()
     customer_style = """British English \
             thrilled and delighted
@@ -315,19 +315,18 @@ with tab4:
 
     best_selling_product= """
     The best selling products:-
-    1.Sandals 
-    2.Loafers
-
-
+    1.Ciroc Vodka
+    2.Black & White Blended Whisky
     """
 
 
-    welcome_offer="""Free express shipping for a limited time.,Give $10, get $10 when you refer a friend."""
+    welcome_offer="""1.Free express shipping for a limited time.
+                        2.Give $10, get $10 when you refer a friend."""
     # Function to generate personalized messages for new users
     def personlized_message_new_user(style, welcome_offer, best_selling_pro, user_data,instruction_existing):
 
-        prompt =f"""Generate a personalized welcome message for new users as they log in to the 'Sigmoid' website. 
-                            Utilize user data ({user_data}) to tailor the message must inlcude name. 
+        prompt =f"""Generate a personalized welcome message for new users as they log in to the 'Diageo' website. 
+                            Utilize user data ({user_data}) to tailor the message must include name. 
                             Highlight the best-selling products ({best_selling_pro}) 
                             and current welcome offers ({welcome_offer}). 
                             Present the message in a stylish format that is {style}
@@ -339,14 +338,14 @@ with tab4:
 
     # Function to generate personalized messages for existing users
     def personlized_message_existing_user(style, Existing_user_data, Rec_product, Offers_and_promotion,instruction_existing):
-        prompt = f"""Generate a personalized welcome message for users logging into the website.
-                        Utilize existing user data, including {Existing_user_data}, 
+        prompt_user = f"""Generate a personalized welcome message for users logging into the Diageo website.
+                        Utilize existing user data, including {Existing_user_data} include the name in begning, 
                         to provide tailored product recommendations ({Rec_product}). 
                         Incorporate cart item promotions and offers ({Offers_and_promotion}). 
                         Present the message in a stylish format ({style}). 
                         Follow the provided instructions carefully: {instruction_existing}.
                     """
-        message= generate_bedrock_response(prompt)
+        message= generate_bedrock_response(prompt_user)
         return message
 
     # Define custom colors
@@ -379,9 +378,9 @@ with tab4:
     )
 
     # Recommendation part
-    st.title("🎁 Personalized Product Recommendations")
+    st.markdown("### 🎁 Personalized Welcome Message")
     st.markdown("<hr style='border: 2px solid red; width: 100%;'>", unsafe_allow_html=True)
-    st.subheader("Login to get personalized recommendations.")
+    # st.subheader("Login to get personalized recommendations.")
 
     with st.form("login_form"):
         user_id = st.text_input("User ID")
@@ -396,7 +395,7 @@ with tab4:
                 if recommended_products:
                     offer = df_final[df_final["product_id"].isin(recommended_products)]["offers"].unique().tolist()
                     offers = [offer[0], offer[-1]]
-                    Existing_user_data = {"Name": user_name, "Existing Items in the cart": ["Sandals", "Loafers", "Sneakers"]}
+                    Existing_user_data = {"Name": user_name, "Existing Items in the cart": ["Tanqueray Sterling Vodka", "7 Crown Appl", "Ursus Punch Vodka"]}
                     Rec_product = recommended_products
                     Offers_and_promotion = offers
                     existing_user = personlized_message_existing_user(customer_style, Existing_user_data, Rec_product, Offers_and_promotion,instruction_existing)
