@@ -1,64 +1,49 @@
 import numpy as np 
 import pandas as pd
 import streamlit as st 
-from PyPDF2 import PdfFileReader, PdfFileWriter,PdfReader
-import os
-from langchain.chat_models import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate
-import streamlit as st
-from langchain.llms import OpenAI
-from langchain.text_splitter import CharacterTextSplitter
-from langchain.embeddings import OpenAIEmbeddings
-from langchain.vectorstores import Chroma
-from langchain.chains import RetrievalQA
-from langchain.vectorstores import FAISS
-from PyPDF2 import PdfFileReader, PdfFileWriter,PdfReader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-import pickle
-from langchain.callbacks import get_openai_callback
-from langchain.chains.question_answering import load_qa_chain
-from langchain.llms import Bedrock
 from function import visualize_timeseries ,yoy_growth,calculate_trend_slope_dataframe,generate_bedrock_response, recommend_products,generate_image,base64_to_pil,generate_bedrock_jurasic
 
 
 st.set_option('deprecation.showPyplotGlobalUse', False)
 st.set_page_config(
             page_title="Sigmoid GenAI",
-            page_icon="Code/cropped-Sigmoid_logo_3x.png"  
+            page_icon="Code/cropped-Sigmoid_logo_3x.png",
+            layout="wide",
+            initial_sidebar_state="collapsed"
         )
 st.sidebar.markdown("<hr style='border: 2px solid red; width: 100%;'>", unsafe_allow_html=True)
 st.sidebar.image("Code/cropped-Sigmoid_logo_3x.png", use_column_width=True)
 st.sidebar.markdown("<hr style='border: 2px solid red; width: 100%;'>", unsafe_allow_html=True)
 st.markdown('<style>div.row-widget.stButton > button:first-child {background-color: blue; color: white;}</style>', unsafe_allow_html=True)
 
-def select_country(d):
-    country = st.sidebar.selectbox("Select Country:", d["geo"].unique().tolist())
-    return country
+# def select_country(d):
+#     country = st.sidebar.selectbox("Select Country:", d["geo"].unique().tolist())
+#     return country
 
-def select_level(d):
-        levels = ["geo", "category", "brand", "SKU"]
-        selected_levels = st.sidebar.multiselect("Select Levels", levels, default=["geo"])
+# def select_level(d):
+#         levels = ["geo", "category", "brand", "SKU"]
+#         selected_levels = st.sidebar.multiselect("Select Levels", levels, default=["geo"])
 
-        selected_category = None
-        selected_brand = None
-        selected_SKU = None
+#         selected_category = None
+#         selected_brand = None
+#         selected_SKU = None
 
-        if "category" in selected_levels:
-            st.sidebar.header("Category")
-            category_options = d["category"].unique().tolist()
-            selected_category = st.sidebar.selectbox("Select category:", category_options)
+#         if "category" in selected_levels:
+#             st.sidebar.header("Category")
+#             category_options = d["category"].unique().tolist()
+#             selected_category = st.sidebar.selectbox("Select category:", category_options)
 
-        if "brand" in selected_levels:
-            st.sidebar.header("Brand")
-            brand_options = d["brand"].unique().tolist()
-            selected_brand = st.sidebar.selectbox("Select brand:", brand_options)
+#         if "brand" in selected_levels:
+#             st.sidebar.header("Brand")
+#             brand_options = d["brand"].unique().tolist()
+#             selected_brand = st.sidebar.selectbox("Select brand:", brand_options)
 
-        if "SKU" in selected_levels:
-            st.sidebar.header("SKU")
-            SKU_options = d["SKU"].unique().tolist()
-            selected_SKU = st.sidebar.selectbox("Select SKU:", SKU_options)
+#         if "SKU" in selected_levels:
+#             st.sidebar.header("SKU")
+#             SKU_options = d["SKU"].unique().tolist()
+#             selected_SKU = st.sidebar.selectbox("Select SKU:", SKU_options)
 
-        return selected_levels, selected_category, selected_brand, selected_SKU
+#         return selected_levels, selected_category, selected_brand, selected_SKU
 
 df_dash = pd.read_csv("Data/retail3.csv")
 tab1, tab2 ,tab3,tab4,tab5,tab6= st.tabs(["About the App", "Demand forecasting interpreater","CodeAI","Personlized Message","Image Gen","Q&A"])
@@ -78,27 +63,89 @@ with tab1:
         st.markdown("<hr style='border: 1.5px solid red; width: 100%;'>", unsafe_allow_html=True)
 with tab2:
     def main():
+                def select_level(d):
+                    """
+                    Select data levels and additional options.
+
+                    Parameters:
+                    - d: DataFrame containing the data.
+
+                    Returns:
+                    - A tuple containing selected levels and other options.
+                    """
+                    
+                    
+
+                    # Create a list to store selected options
+                    selected_levels = []
+                    col_cou1,col_cou2,col_cou3,col_cou4=st.columns(4)
+                    with col_cou1:
+                        geo_options = d["geo"].unique().tolist()
+                        st.markdown('<p style="border: 2px solid red; padding: 1px; font-weight: bold;color: blue;size:4;">Select Country:</p>', unsafe_allow_html=True)
+                        selected_geo = st.selectbox("", geo_options)
+                        d=d[d["geo"]==selected_geo]
+                        selected_levels.append("geo")
+                    c1,c2,c3,c4=st.columns(4)
+
+                    with c1:
+                        st.markdown('<p style="border: 2px solid red; padding: 0.1px; font-weight: bold;color: blue;">Select Hierarchy :</p>', unsafe_allow_html=True)
+                    # Create columns for checkboxes
+                    col1, col2, col3 = st.columns(3)
+                    
+                    #Create a checkbox for each level
+                    with col1:
+                        #st.markdown('<span style="font-size: 20px;"><font color="blue" size=4><b>category:</b></font></span>', unsafe_allow_html=True)
+                        checkbox = st.checkbox("###### :red[category] 🛒", value="category" in selected_levels, key="category")
+                        if checkbox:
+                            selected_levels.append("category")
+
+                    with col2:
+                        #st.markdown('<span style="font-size: 20px;"><font color="blue" size=4><b>brand:</b></font></span>', unsafe_allow_html=True)
+                        checkbox = st.checkbox("###### :red[brand] 🍺", value="brand" in selected_levels, key="brand")
+                        if checkbox:
+                            selected_levels.append("brand")
+
+                    with col3:
+                        #st.markdown('<span style="font-size: 20px;"><font color="blue" size=4><b>SKU:</b></font></span>', unsafe_allow_html=True)
+                        checkbox = st.checkbox("###### :red[SKU] 💲", value="SKU" in selected_levels, key="SKU")
+                        if checkbox:
+                            selected_levels.append("SKU")
+                    #selected_geo="Great Britain"
+                    selected_category = None
+                    selected_brand = None
+                    selected_SKU = None
+                    # Create columns for select boxes
+                    col1, col2, col3= st.columns(3)
+                    with col1:
+                        if "category" in selected_levels:
+                            category_options = d["category"].unique().tolist()
+                            #st.markdown('<p style="border: 2px solid red; padding: 1px; font-weight: bold;color: blue;size:4;">Select category:</p>', unsafe_allow_html=True)
+                            selected_category = st.selectbox("", category_options)
+                            d=d[d["category"]==selected_category]
+
+                    with col2:
+                        if "brand" in selected_levels:
+                            brand_options = d["brand"].unique().tolist()
+                            #st.markdown('<p style="border: 2px solid red; padding: 1px; font-weight: bold;color: blue;size:4;">Select brand:</p>', unsafe_allow_html=True)
+                            selected_brand = st.selectbox("", brand_options)
+                            d=d[d["brand"]==selected_brand]
+
+                    with col3:
+                        if "SKU" in selected_levels:
+                            SKU_options = d["SKU"].unique().tolist()
+                            #st.markdown('<p style="border: 2px solid red; padding: 1px; font-weight: bold;color: blue;size:4;">Select SKU:</p>', unsafe_allow_html=True)
+                            selected_SKU = st.selectbox("", SKU_options)
+
+                    return selected_levels, selected_category, selected_brand, selected_SKU,selected_geo
+
+
             
-                # st.markdown("<h1 style='color: blue;'>GenAI: Time Series Dashboard</h1>", unsafe_allow_html=True)
-                st.markdown('<p style="color:red; font-size:30px; font-weight:bold;">GenAI: Time Series Dashboard:</p>', unsafe_allow_html=True)
-                st.markdown("<hr style='border: 2px solid red; width: 100%;'>", unsafe_allow_html=True)
-                st.markdown('<p style="color:blue; font-size:20px; font-weight:bold;">👨‍💻  How to Use:</p>', unsafe_allow_html=True)
-                st.write("1. Select a country from the sidebar to filter data.")
-                st.write("2. Choose the levels you want to analyze: geo, category, brand, SKU.")
-                st.write("3. Visualize your time series data.")
-                st.write("4. Click on Get insights.")
-                st.markdown("<hr style='border: 1.5px solid red; width: 100%;'>", unsafe_allow_html=True)
-                st.markdown('<p style="color:blue; font-size:20px; font-weight:bold;">Limitations ⚠️:</p>', unsafe_allow_html=True)
-                st.write("- It may not capture all nuances and context")
-                st.markdown("<hr style='border: 1.5px solid red; width: 100%;'>", unsafe_allow_html=True)
-                st.sidebar.header("User Inputs")
-                country = select_country(df_dash)
                 selected_levels = select_level(df_dash)
 
                 # Time Series Visualization Section
                 st.subheader("Visualize your time series")
                 st.markdown("---")
-                data = visualize_timeseries(df_dash,selected_levels[0], country,
+                data = visualize_timeseries(df_dash,selected_levels[0], selected_levels[4],
                                             selected_levels[1], selected_levels[2], selected_levels[3])    
                 data_trend = calculate_trend_slope_dataframe(data)
                 if data_trend.empty:
